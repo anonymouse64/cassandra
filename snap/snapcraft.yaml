@@ -1,6 +1,5 @@
 name: cassandra
-version: latest
-version-script: git -C parts/cassandra/build describe --tags | sed 's/cassandra-//'
+version: 3.11.2
 summary: Manage massive amounts of data, fast, without losing sleep
 description: |
   The Apache Cassandra database is the right choice when you need
@@ -18,6 +17,8 @@ apps:
     cassandra:
         command: wrapper-cassandra
         daemon: forking
+        environment:
+            JAVA_HOME: ${SNAP}/usr/lib/jvm/java-1.8.0-openjdk-amd64
         # mount-observe needs to be manually connected post-install:
         # `sudo snap connect cassandra:mount-observe ubuntu-core:mount-observe`
         plugs:
@@ -45,24 +46,9 @@ apps:
         command: env-get
 parts:
     cassandra:
-        plugin: ant
-        ant-properties:
-            dist.dir: $SNAPCRAFT_PART_INSTALL
-        ant-build-targets:
-            - artifacts
-        source: https://github.com/apache/cassandra
-        source-type: git
-        override-build: |
-            last_committed_tag="$(git describe --tags --abbrev=0)"
-            last_committed_tag_ver="$(echo $last_committed_tag | sed 's/cassandra-//')"
-            last_released_tag="$(snap info wethr | awk '$1 == "beta:" { print $2 }')"
-            # If the latest tag from the upstream project has not been released to
-            # beta, build that tag instead of master.
-            if [ "${last_committed_tag_ver}" != "${last_released_tag}" ]; then
-              git fetch
-              git checkout "${last_committed_tag}"
-            fi
-            snapcraftctl build
+        plugin: dump
+        source: http://apache.claz.org/cassandra/3.11.2/apache-cassandra-3.11.2-bin.tar.gz
+        source-type: tar
         build-packages:
             - ant-optional
             - build-essential
@@ -75,6 +61,7 @@ parts:
             - grep
             # For free(1)
             - procps
+            - openjdk-8-jdk
         organize:
             # Rename directories into their expected locations. Analogous to
             # Debian's .install files.
