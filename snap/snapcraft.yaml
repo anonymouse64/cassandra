@@ -17,8 +17,6 @@ apps:
     cassandra:
         command: wrapper-cassandra
         daemon: forking
-        environment:
-            JAVA_HOME: ${SNAP}/usr/lib/jvm/java-1.8.0-openjdk-amd64
         # mount-observe needs to be manually connected post-install:
         # `sudo snap connect cassandra:mount-observe ubuntu-core:mount-observe`
         plugs:
